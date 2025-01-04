@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tran Thang</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .center-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .center-content img {
+            width: 200px;
+            height: auto;
+            border-radius: 50%;
+        }
+
+        .center-content h1 {
+            margin-top: 20px;
+            font-size: 2em;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .menu {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .menu.right {
+            right: 20px;
+            text-align: left;
+        }
+
+        .menu h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        .menu p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .menu .contact p {
+            margin-bottom: 3px;
+            font-size: 14px;
+        }
+
+        .music-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .music-controls button {
+            background-color: #222;
+            color: white;
+            border: 2px solid #444;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 14px;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+        }
+
+        .music-controls button:hover {
+            background-color: #444;
+            color: #00ff00;
+            border-color: #00ff00;
+        }
+
+        .music-controls button::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .music-controls button:hover::after {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(-50%, -50%) translateY(-10px);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(10px);
+            }
+            100% {
+                transform: translate(-50%, -50%) translateY(-10px);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="background"></canvas>
+
+    <div class="center-content">
+        <img src="https://cdn.discordapp.com/attachments/1241764446142201929/1324672501103595530/434710786_343610918695690_4528232608926995016_n.png?ex=6779a9a7&is=67785827&hm=3576d93fd3f151974158bca4322c93900c0c6c5f11ac4e96106852dcba879694&" alt="Tran Thang">
+        <h1>Tran Thang</h1>
+    </div>
+
+    <div class="menu right">
+        <h3>Tran Thang</h3>
+        <p>Anh hùng bàn phím</p>
+        <p>Chúa xạo chó</p>
+        <p>Idol mafia internet</p>
+        <h3>THÔNG TIN LIÊN HỆ</h3>
+        <div class="contact">
+            <p>Gmail: tranthang20111@gmail.com</p>
+            <p>FB: Tran Thang</p>
+        </div>
+    </div>
+
+    <div class="music-controls">
+        <button id="play-pause" data-tooltip="Nhấn để mở nhạc">Pause Music</button>
+        <button id="volume-up" data-tooltip="Tăng âm lượng">Volume +</button>
+        <button id="volume-down" data-tooltip="Giảm âm lượng">Volume -</button>
+    </div>
+
+    <audio id="background-music" src="nhac.mp3" loop></audio>
+
+    <script>
+        // Background with floating dots
+        const canvas = document.getElementById('background');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+
+        class Particle {
+            constructor(x, y, radius, speedX, speedY) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.speedX = speedX;
+                this.speedY = speedY;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 100; i++) {
+                let x = Math.random() * canvas.width;
+                let y = Math.random() * canvas.height;
+                let radius = Math.random() * 3;
+                let speedX = (Math.random() - 0.5) * 2;
+                let speedY = (Math.random() - 0.5) * 2;
+
+                particles.push(new Particle(x, y, radius, speedX, speedY));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        initParticles();
+        animate();
+
+        // Music Controls
+        const music = document.getElementById('background-music');
+        const playPauseBtn = document.getElementById('play-pause');
+        const volumeUpBtn = document.getElementById('volume-up');
+        const volumeDownBtn = document.getElementById('volume-down');
+
+        // Set default volume
+        music.volume = 0.5;
+
+        playPauseBtn.addEventListener('click', () => {
+            if (music.paused) {
+                music.play();
+                playPauseBtn.textContent = 'Pause Music';
+            } else {
+                music.pause();
+                playPauseBtn.textContent = 'Play Music';
+            }
+        });
+
+        volumeUpBtn.addEventListener('click', () => {
+            music.volume = Math.min(music.volume + 0.1, 1);
+        });
+
+        volumeDownBtn.addEventListener('click', () => {
+            music.volume = Math.max(music.volume - 0.1, 0);
+        });
+
+        // Auto play music on load
+        window.onload = () => {
+            music.play();
+            playPauseBtn.textContent = 'Pause Music';
+        };
+    </script>
+</body>
+</html>
